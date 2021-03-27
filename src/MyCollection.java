@@ -2,6 +2,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class MyCollection<E> implements Collection<E> {
 
@@ -37,7 +38,7 @@ public class MyCollection<E> implements Collection<E> {
     @Override
     public final boolean contains(final Object object) {
         for (E element : this) {
-            if (element.equals(object)) {
+            if (Objects.equals(element, object)) {
                 return true;
             }
         }
@@ -66,7 +67,7 @@ public class MyCollection<E> implements Collection<E> {
         Iterator<E> iterator = iterator();
 
         while (iterator.hasNext()) {
-            if (iterator.next().equals(object)) {
+            if (Objects.equals(iterator.next(), object)) {
                 iterator.remove();
                 return true;
             }
@@ -97,7 +98,7 @@ public class MyCollection<E> implements Collection<E> {
         boolean result = false;
 
         for (Object object : collection) {
-            if (remove(object)) {
+            while (remove(object)) {
                 result = true;
             }
         }
@@ -107,20 +108,25 @@ public class MyCollection<E> implements Collection<E> {
     @Override
     public final boolean retainAll(final Collection<?> collection) {
         boolean result = false;
-
-        for (E element : this) {
-            if (!collection.contains(element)) {
-                this.remove(element);
+        int steps = size;
+        int it = 0;
+        for (int i = 0; i <= steps; i++) {
+            if (!collection.contains(elementData[it])) {
+                this.remove(elementData[it]);
+                it--;
                 result = true;
             }
+            it++;
         }
         return result;
     }
 
     @Override
     public final void clear() {
-        for (E element : this) {
-            this.remove(element);
+        int steps = size;
+        int it = 0;
+        for (int i = 0; i <= steps; i++) {
+            this.remove(elementData[it]);
         }
     }
 
@@ -150,8 +156,10 @@ public class MyCollection<E> implements Collection<E> {
                 throw new java.lang.IllegalStateException();
             }
             Object[] newElementData = new Object[elementData.length];
-            System.arraycopy(elementData, 0, newElementData, 0, cursor - 1);
-            System.arraycopy(elementData, cursor, newElementData, cursor - 1, size - 1);
+            if (size != 1) {
+                System.arraycopy(elementData, 0, newElementData, 0, cursor - 1);
+                System.arraycopy(elementData, cursor, newElementData, cursor - 1, size - 1);
+            }
             elementData = Arrays.copyOf(newElementData, elementData.length);
             size--;
             cursor--;
